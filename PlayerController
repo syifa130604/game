@@ -1,0 +1,46 @@
+using UnityEngine; // Baris ini WAJIB ada supaya Unity kenal kata 'Time'
+
+public class PlayerController : MonoBehaviour
+{
+    public float speed = 15f; 
+    private AudioSource suaraLedakan;
+
+    void Start()
+    {
+        suaraLedakan = GetComponent<AudioSource>();
+    }
+
+    void Update()
+    {
+        Vector3 mousePos = Input.mousePosition;
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(mousePos);
+        worldPos.z = 0; 
+        transform.position = Vector3.Lerp(transform.position, worldPos, speed * Time.deltaTime);
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Obstacle"))
+        {
+            if (suaraLedakan != null) suaraLedakan.Play();
+
+            GetComponent<SpriteRenderer>().enabled = false;
+            GetComponent<Collider2D>().enabled = false;
+
+            // Mematikan musik latar
+            AudioSource[] allAudioSources = FindObjectsByType<AudioSource>(FindObjectsSortMode.None);
+            foreach(AudioSource audioS in allAudioSources) 
+            {
+                if(audioS != suaraLedakan) audioS.Stop();
+            }
+
+            Debug.Log("GAME OVER!");
+            Invoke("StopGame", 0.5f); 
+        }
+    }
+
+    void StopGame()
+    {
+        UnityEngine.Time.timeScale = 0f; // Kita panggil secara spesifik agar tidak error
+    }
+}
